@@ -25,6 +25,14 @@ from clawpack.visclaw.plotclaw import plotclaw
 from clawpack.pyclaw.util import run_app_from_main
 
 def setup(use_petsc = False, riemann_solver = 'roe'):
+    '''
+    Sets up the simulation environment, configuring the solver, domain, initial conditions,
+    and other simulation parameters based on the Euler equations.
+    
+    Supports choosing between different solvers and optionally using PETSc for parallel execution.    
+    '''
+
+    # PETSc: Portable, Extensible Toolkit for Scientific Computation
     if use_petsc:
         import clawpack.petclaw as pyclaw
     else:
@@ -36,19 +44,25 @@ def setup(use_petsc = False, riemann_solver = 'roe'):
     elif riemann_solver.lower() == 'hlle':
         solver = pyclaw.ClawSolver2D(riemann.euler_hlle_2D)
         solver.transverse_waves = 0
-        solver.cfl_desired = 0.4
-        solver.cfl_max = 0.5
+        solver.cfl_desired = 0.4 # (stability condition)
+        solver.cfl_max = 0.5 # (stability condition)
     
+    # extrapolate the values at the boundaries from the interior values
     solver.all_bcs = pyclaw.BC.extrap
 
+    # computational domain (unit square): [0, 0] to [1, 1] divided into a 100x100 grid
     domain = pyclaw.Domain([0., 0.], [1., 1.], [100, 100])
     solution = pyclaw.Solution(num_eqn, domain)
-    gamma = 1.4
+    gamma = 1.4 # heat ratio (air)
     solution.problem_data['gamma'] = gamma
 
-    # set initial data
+    # cell-centered coordinates for the grid
     xx, yy = domain.grid.p_centers
+
+    # boolean mask for left (l), right (r), bottom (b), and top (t) sections of the domain
     l, r, b, t = xx < 0.8, xx >= 0.8, yy < 0.8, yy >= 0.8
+
+    # set initial data
     solution.q[density,...] = 1.5 * r * t + 0.532258064516129 * l * t + 0.137992831541219 * l * b + 0.532258064516129 * r * b
     u = 0.0 * r * t + 1.206045378311055 * l * t + 1.206045378311055 * l * b + 0.0 * r * b
     v = 0.0 * r * t + 0.0 * l * t + 1.206045378311055 * l * b + 1.206045378311055 * r * b
@@ -59,7 +73,7 @@ def setup(use_petsc = False, riemann_solver = 'roe'):
     solution.q[energy,...] = 0.5 * solution.q[density,...] * (u ** 2 + v ** 2) + p / (gamma - 1.0)
 
     claw = pyclaw.Controller()
-    claw.tfinal = 0.8
+    claw.tfinal = 0.8 # (time)
     claw.num_output_times = 10
     claw.solution = solution
     claw.solver = solver
@@ -70,6 +84,9 @@ def setup(use_petsc = False, riemann_solver = 'roe'):
     return claw
 
 def setplot(plotdata = None):
+    '''
+    Configures the plotting settings for the simulation output, representing density.
+    '''
     if plotdata is None:
         plotdata = ClawPlotData()
     
