@@ -24,6 +24,36 @@ from clawpack.visclaw.plotclaw import plotclaw
 
 from clawpack.pyclaw.util import run_app_from_main
 
+def solution(density_, velocity_, pressure_, gamma = 1.4, use_petsc = False):
+    # PETSc: Portable, Extensible Toolkit for Scientific Computation
+    if use_petsc:
+        import clawpack.petclaw as pyclaw
+    else:
+        from clawpack import pyclaw
+
+    # computational domain (unit square): [0, 0] to [1, 1] divided into a 100x100 grid
+    domain = pyclaw.Domain([0., 0.], [1., 1.], [100, 100])
+    solution = pyclaw.Solution(num_eqn, domain)
+    solution.problem_data['gamma'] = gamma
+
+    # cell-centered coordinates for the grids
+    xx, yy = domain.grid.p_centers
+
+    # boolean mask for left (l), right (r), bottom (b), and top (t) sections of the domain
+    l, r, b, t = xx < 0.8, xx >= 0.8, yy < 0.8, yy >= 0.8
+
+    # set initial data
+    solution.q[density,...] = density_[0] * r * t + density_[1] * l * t + density_[2] * l * b + density_[3] * r * b
+    u = velocity_[0][0] * r * t + velocity_[1][0] * l * t + velocity_[2][0] * l * b + velocity_[3][0] * r * b
+    v = velocity_[0][1] * r * t + velocity_[1][1] * l * t + velocity_[2][1] * l * b + velocity_[3][1] * r * b
+    p = pressure_[0] * r * t + pressure_[1] * l * t + pressure_[2] * l * b + pressure_[3] * r * b
+
+    solution.q[x_momentum,...] = solution.q[density,...] * u
+    solution.q[y_momentum,...] = solution.q[density,...] * v
+    solution.q[energy,...] = 0.5 * solution.q[density,...] * (u ** 2 + v ** 2) + p / (gamma - 1.0)
+
+    return solution
+
 def setup(use_petsc = False, riemann_solver = 'roe'):
     '''
     Sets up the simulation environment, configuring the solver, domain, initial conditions,
@@ -50,32 +80,14 @@ def setup(use_petsc = False, riemann_solver = 'roe'):
     # extrapolate the values at the boundaries from the interior values
     solver.all_bcs = pyclaw.BC.extrap
 
-    # computational domain (unit square): [0, 0] to [1, 1] divided into a 100x100 grid
-    domain = pyclaw.Domain([0., 0.], [1., 1.], [100, 100])
-    solution = pyclaw.Solution(num_eqn, domain)
-    gamma = 1.4 # heat ratio (air)
-    solution.problem_data['gamma'] = gamma
-
-    # cell-centered coordinates for the grid
-    xx, yy = domain.grid.p_centers
-
-    # boolean mask for left (l), right (r), bottom (b), and top (t) sections of the domain
-    l, r, b, t = xx < 0.8, xx >= 0.8, yy < 0.8, yy >= 0.8
-
-    # set initial data
-    solution.q[density,...] = 1.5 * r * t + 0.532258064516129 * l * t + 0.137992831541219 * l * b + 0.532258064516129 * r * b
-    u = 0.0 * r * t + 1.206045378311055 * l * t + 1.206045378311055 * l * b + 0.0 * r * b
-    v = 0.0 * r * t + 0.0 * l * t + 1.206045378311055 * l * b + 1.206045378311055 * r * b
-    p = 1.5 * r * t + 0.3 * l * t + 0.029032258064516 * l * b + 0.3 * r * b
-
-    solution.q[x_momentum,...] = solution.q[density,...] * u
-    solution.q[y_momentum,...] = solution.q[density,...] * v
-    solution.q[energy,...] = 0.5 * solution.q[density,...] * (u ** 2 + v ** 2) + p / (gamma - 1.0)
-
+    density_ = [1.5, 0.532258064516129, 0.137992831541219, 0.532258064516129]
+    velocity_ = [(0.0, 0.0), (1.206045378311055, 0.0), (1.206045378311055, 1.206045378311055), (0.0, 1.206045378311055)]
+    pressure_ = [1.5, 0.3, 0.029032258064516, 0.3]
+    
     claw = pyclaw.Controller()
     claw.tfinal = 0.8 # (time)
     claw.num_output_times = 10
-    claw.solution = solution
+    claw.solution = solution(density_, velocity_, pressure_)
     claw.solver = solver
 
     claw.output_format = 'ascii'
@@ -94,7 +106,7 @@ def setplot(plotdata = None):
     plotdata.clearfigures()
 
     # figure for density - pcolor
-    plotfigure = plotdata.new_plotfigure(name = 'Density', figno=0)
+    plotfigure = plotdata.new_plotfigure(name = 'Density', figno = 0)
 
     # set up axes
     plotaxes = plotfigure.new_plotaxes()
