@@ -102,6 +102,8 @@ def setplot(plotdata = None):
     if plotdata is None:
         plotdata = ClawPlotData()
     
+    plotdata.plotdir = './_plots'
+    
     # clear figures, axes, items data
     plotdata.clearfigures()
 
@@ -148,6 +150,8 @@ def setplot_simple(plotdata = None):
     '''
     if plotdata is None:
         plotdata = ClawPlotData()
+    
+    plotdata.plotdir = './_plots'
     
     # clear figures, axes, items data
     plotdata.clearfigures()
