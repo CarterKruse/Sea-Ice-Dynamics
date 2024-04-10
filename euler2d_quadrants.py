@@ -121,8 +121,8 @@ def setplot(plotdata = None):
     plotitem = plotaxes.new_plotitem(plot_type = '2d_pcolor')
     plotitem.plot_var = density
     plotitem.pcolor_cmap = colormaps.yellow_red_blue
-    plotitem.pcolor_cmin = 0.0
-    plotitem.pcolor_cmax = 2.0
+    plotitem.pcolor_cmin = 'auto'
+    plotitem.pcolor_cmax = 'auto'
     plotitem.add_colorbar = True
 
     # figure for density - schlieren
@@ -138,8 +138,8 @@ def setplot(plotdata = None):
     # set up items
     plotitem = plotaxes.new_plotitem(plot_type = '2d_schlieren')
     plotitem.plot_var = density
-    plotitem.schlieren_cmin = 0.0
-    plotitem.schlieren_cmax = 1.0
+    plotitem.schlieren_cmin = 'auto'
+    plotitem.schlieren_cmax = 'auto'
     plotitem.add_colorbar = False
 
     return plotdata
@@ -171,8 +171,8 @@ def setplot_simple(plotdata = None):
     plotitem = plotaxes.new_plotitem(plot_type = '2d_pcolor')
     plotitem.plot_var = density
     plotitem.pcolor_cmap = colormaps.yellow_red_blue
-    plotitem.pcolor_cmin = 0.0
-    plotitem.pcolor_cmax = 2.0
+    plotitem.pcolor_cmin = 'auto'
+    plotitem.pcolor_cmax = 'auto'
     plotitem.add_colorbar = False
 
     # figure for density - schlieren
@@ -189,8 +189,8 @@ def setplot_simple(plotdata = None):
     # set up items
     plotitem = plotaxes.new_plotitem(plot_type = '2d_schlieren')
     plotitem.plot_var = density
-    plotitem.schlieren_cmin = 0.0
-    plotitem.schlieren_cmax = 1.0
+    plotitem.schlieren_cmin = 'auto'
+    plotitem.schlieren_cmax = 'auto'
     plotitem.add_colorbar = False
 
     return plotdata
