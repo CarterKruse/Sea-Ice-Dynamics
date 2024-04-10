@@ -142,6 +142,55 @@ def setplot(plotdata = None):
 
     return plotdata
 
+def setplot_simple(plotdata = None):
+    '''
+    Configures the plotting settings for the simulation output, representing density, without axes, labels, title, and colorbar.
+    '''
+    if plotdata is None:
+        plotdata = ClawPlotData()
+    
+    # clear figures, axes, items data
+    plotdata.clearfigures()
+
+    # figure for density - pcolor
+    plotfigure = plotdata.new_plotfigure(name = 'Density', figno = 0)
+
+    # set up axes
+    plotaxes = plotfigure.new_plotaxes()
+    plotaxes.xlimits = 'auto'
+    plotaxes.ylimits = 'auto'
+    plotaxes.scaled = True
+    plotaxes.title = ''
+    plotaxes.axescmd = 'subplot().set_axis_off()' # remove axes
+
+    # set up items
+    plotitem = plotaxes.new_plotitem(plot_type = '2d_pcolor')
+    plotitem.plot_var = density
+    plotitem.pcolor_cmap = colormaps.yellow_red_blue
+    plotitem.pcolor_cmin = 0.0
+    plotitem.pcolor_cmax = 2.0
+    plotitem.add_colorbar = False
+
+    # figure for density - schlieren
+    plotfigure = plotdata.new_plotfigure(name = 'Schlieren', figno = 1)
+
+    # set up axes
+    plotaxes = plotfigure.new_plotaxes()
+    plotaxes.xlimits = 'auto'
+    plotaxes.ylimits = 'auto'
+    plotaxes.scaled = True # aspect ratio = 1
+    plotaxes.title = ''
+    plotaxes.axescmd = 'subplot().set_axis_off()' # remove axes
+
+    # set up items
+    plotitem = plotaxes.new_plotitem(plot_type = '2d_schlieren')
+    plotitem.plot_var = density
+    plotitem.schlieren_cmin = 0.0
+    plotitem.schlieren_cmax = 1.0
+    plotitem.add_colorbar = False
+
+    return plotdata
+
 if __name__ == '__main__':
     output = run_app_from_main(setup)
-    plotclaw('_output', setplot = setplot)
+    plotclaw('_output', setplot = setplot_simple)
