@@ -48,6 +48,15 @@ def solution(density_field, velocity_field, pressure_field, gamma = 1.4, use_pet
 
     return solution
 
+def normalize(array, min_val = 0.0, max_val = 1.0, epsilon = 1e-10):
+    # calculate the min / max of the array
+    min_ = np.min(array)
+    max_ = np.max(array)
+
+    normalized = (max_val - min_val) * (array - min_) / (max_ - min_) + min_val + epsilon
+
+    return normalized
+
 def setup(use_petsc = False, riemann_solver = 'roe'):
     '''
     Sets up the simulation environment, configuring the solver, domain, initial conditions,
@@ -79,11 +88,12 @@ def setup(use_petsc = False, riemann_solver = 'roe'):
     # velocity_field = np.zeros((100, 100, 2))
 
     np.random.seed(42)
-    density_field = gaussian_filter(np.random.rand(100, 100) * 2, sigma = 1)
-    pressure_field = gaussian_filter(np.random.rand(100, 100) * 2, sigma = 1)
+    sigma = 4
+    density_field = normalize(gaussian_filter(np.random.rand(100, 100) * 2, sigma))
+    pressure_field = normalize(gaussian_filter(np.random.rand(100, 100) * 2, sigma))
 
-    x_velocity_field = gaussian_filter(np.random.rand(100, 100) * 4 -2, sigma = 1)
-    y_velocity_field = gaussian_filter(np.random.rand(100, 100) * 4 - 2, sigma = 1)
+    x_velocity_field = normalize(gaussian_filter(np.random.rand(100, 100) * 4 - 2, sigma), -1, 1)
+    y_velocity_field = normalize(gaussian_filter(np.random.rand(100, 100) * 4 - 2, sigma), -1, 1)
     velocity_field = np.stack((x_velocity_field, y_velocity_field), axis = -1)
 
     plot_fields(density_field, velocity_field, pressure_field)
@@ -125,8 +135,8 @@ def setplot(plotdata = None):
     plotitem = plotaxes.new_plotitem(plot_type = '2d_pcolor')
     plotitem.plot_var = density
     plotitem.pcolor_cmap = colormaps.yellow_red_blue
-    plotitem.pcolor_cmin = 0.0
-    plotitem.pcolor_cmax = 2.0
+    plotitem.pcolor_cmin = 'auto'
+    plotitem.pcolor_cmax = 'auto'
     plotitem.add_colorbar = True
 
     # figure for density - schlieren
@@ -142,8 +152,8 @@ def setplot(plotdata = None):
     # set up items
     plotitem = plotaxes.new_plotitem(plot_type = '2d_schlieren')
     plotitem.plot_var = density
-    plotitem.schlieren_cmin = 0.0
-    plotitem.schlieren_cmax = 1.0
+    plotitem.schlieren_cmin = 'auto'
+    plotitem.schlieren_cmax = 'auto'
     plotitem.add_colorbar = False
 
     return plotdata
@@ -175,8 +185,8 @@ def setplot_simple(plotdata = None):
     plotitem = plotaxes.new_plotitem(plot_type = '2d_pcolor')
     plotitem.plot_var = density
     plotitem.pcolor_cmap = colormaps.yellow_red_blue
-    plotitem.pcolor_cmin = 0.0
-    plotitem.pcolor_cmax = 2.0
+    plotitem.pcolor_cmin = 'auto'
+    plotitem.pcolor_cmax = 'auto'
     plotitem.add_colorbar = False
 
     # figure for density - schlieren
@@ -193,8 +203,8 @@ def setplot_simple(plotdata = None):
     # set up items
     plotitem = plotaxes.new_plotitem(plot_type = '2d_schlieren')
     plotitem.plot_var = density
-    plotitem.schlieren_cmin = 0.0
-    plotitem.schlieren_cmax = 1.0
+    plotitem.schlieren_cmin = 'auto'
+    plotitem.schlieren_cmax = 'auto'
     plotitem.add_colorbar = False
 
     return plotdata
