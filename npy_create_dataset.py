@@ -408,6 +408,13 @@ def save_velocity_vectors(solution, velocity_data):
 
     velocity_data.append(data)
 
+def save_density(solution, density_data):
+    '''
+    Saves the density (for each time step) to an array.
+    '''
+    data = solution.q[density,...]
+    density_data.append(data)
+
 def run_simulation_and_save(claw, i, use_petsc = False):
     '''
     Runs the simulation and saves the velocity vectors at each time step.
@@ -432,14 +439,23 @@ def run_simulation_and_save(claw, i, use_petsc = False):
     # run simulation
     claw.run()
 
-    velocity_data = []
+    # velocity_data = []
+
+    # # append velocity vectors for each output time
+    # for frame in range(claw.num_output_times + 1):
+    #     sol = pyclaw.solution.Solution(frame, path = claw.outdir, file_format = claw.output_format)
+    #     save_velocity_vectors(sol, velocity_data)
+
+    # np.save('./_data/velo' + str(i) + '.npy', velocity_data)
+
+    density_data = []
 
     # append velocity vectors for each output time
     for frame in range(claw.num_output_times + 1):
         sol = pyclaw.solution.Solution(frame, path = claw.outdir, file_format = claw.output_format)
-        save_velocity_vectors(sol, velocity_data)
+        save_density(sol, density_data)
 
-    np.save('./_data/velo' + str(i) + '.npy', velocity_data)
+    np.save('./_data/density' + str(i) + '.npy', density_data)
 
 if __name__ == '__main__':
     import logging
