@@ -40,6 +40,12 @@ class DensityFieldDataset(Dataset):
 
 data_directory = './_data'
 time_interval = 3
+batch_size = 5
 
 dataset = DensityFieldDataset(data_directory, time_interval)
-print(dataset.__getitem__(0))
+dataloader = DataLoader(dataset, batch_size = batch_size, shuffle = True, drop_last = True)
+
+for x, y in dataloader:
+    print(x)
+    print(y)
+    break
