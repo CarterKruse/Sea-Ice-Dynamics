@@ -454,8 +454,16 @@ def run_simulation_and_save(claw, i, use_petsc = False):
     for frame in range(claw.num_output_times + 1):
         sol = pyclaw.solution.Solution(frame, path = claw.outdir, file_format = claw.output_format)
         save_density(sol, density_data)
+    
+    # convert list to NumPy array
+    density_array = np.array(density_data)
 
-    np.save('./_data/density' + str(i) + '.npy', density_data)
+    # check for NaN
+    if np.isnan(density_array).any():
+        return False
+    else:
+        np.save(f'./_data/density{i}.npy', density_array)
+        return True
 
 if __name__ == '__main__':
     import logging
@@ -466,10 +474,15 @@ if __name__ == '__main__':
 
     from time import time
 
-    for i in range(100):
+    i = 0
+    while i < 100:
         start = time()
 
         claw = setup()
-        run_simulation_and_save(claw, i)
+        success = run_simulation_and_save(claw, i)
 
-        print(f'Iteration {i} ({time() - start:.2f} seconds)')
+        if success:
+            print(f'Iteration {i} ({time() - start:.2f} seconds)')
+            i += 1
+        else:
+            print(f'Iteration {i} failed due to NaN, retrying...')
