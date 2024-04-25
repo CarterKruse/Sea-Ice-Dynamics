@@ -434,7 +434,7 @@ def run_simulation_and_save(claw, i, use_petsc = False):
     except Exception as e:
         print(f'Error: {str(e)}')
     
-    save_initial_conditions(claw.solution.state.q[density,...], pressure(claw.solution), './_data/ic' + str(i) + '.txt')
+    # save_initial_conditions(claw.solution.state.q[density,...], pressure(claw.solution), './_data/ic' + str(i) + '.txt')
 
     # run simulation
     claw.run()
@@ -450,7 +450,7 @@ def run_simulation_and_save(claw, i, use_petsc = False):
 
     density_data = []
 
-    # append velocity vectors for each output time
+    # append density for each output time
     for frame in range(claw.num_output_times + 1):
         sol = pyclaw.solution.Solution(frame, path = claw.outdir, file_format = claw.output_format)
         save_density(sol, density_data)
