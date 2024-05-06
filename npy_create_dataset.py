@@ -439,30 +439,25 @@ def run_simulation_and_save(claw, i, use_petsc = False):
     # run simulation
     claw.run()
 
-    # velocity_data = []
-
-    # # append velocity vectors for each output time
-    # for frame in range(claw.num_output_times + 1):
-    #     sol = pyclaw.solution.Solution(frame, path = claw.outdir, file_format = claw.output_format)
-    #     save_velocity_vectors(sol, velocity_data)
-
-    # np.save('./_data/velo' + str(i) + '.npy', velocity_data)
-
     density_data = []
+    velocity_data = []
 
-    # append density for each output time
+    # append density/velocity for each output time
     for frame in range(claw.num_output_times + 1):
         sol = pyclaw.solution.Solution(frame, path = claw.outdir, file_format = claw.output_format)
         save_density(sol, density_data)
+        save_velocity_vectors(sol, velocity_data)
     
     # convert list to NumPy array
     density_array = np.array(density_data)
+    velocity_array = np.array(velocity_data)
 
     # check for NaN
-    if np.isnan(density_array).any():
+    if np.isnan(density_array).any() or np.isnan(velocity_array).any():
         return False
     else:
         np.save(f'./_data/density{i}.npy', density_array)
+        np.save(f'./_data/velo{i}.npy', velocity_data)
         return True
 
 if __name__ == '__main__':
@@ -475,7 +470,7 @@ if __name__ == '__main__':
     from time import time
 
     i = 0
-    while i < 100:
+    while i < 20:
         start = time()
 
         claw = setup()
